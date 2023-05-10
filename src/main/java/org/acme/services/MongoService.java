@@ -23,7 +23,7 @@ public class MongoService {
     public void TTL() {
         mongoClient.getDatabase("Countries")
                 .getCollection("CountriesCache")
-                .createIndex(new Document("createdAt", 1), new IndexOptions().expireAfter(6L, TimeUnit.SECONDS));
+                .createIndex(new Document("createdAt", 1), new IndexOptions().expireAfter(10L, TimeUnit.MINUTES));
     }
 
     public List<Country> searchCountries(String name, String whatAmISearching, String searchingCollection) {

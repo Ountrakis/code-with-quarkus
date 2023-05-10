@@ -27,7 +27,6 @@ public class Country {
     @JsonSetter("alpha2Code")
     private String alpha2Code;
 
-
     @JsonSetter("capital")
     private String capital;
 
