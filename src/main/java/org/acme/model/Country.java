@@ -117,6 +117,7 @@ public class Country {
     public void setCurrencies(List<Currencies> currencies) {
         this.currencies = currencies;
     }
+
     public Date getCreatedAt() {
         return createdAt;
     }

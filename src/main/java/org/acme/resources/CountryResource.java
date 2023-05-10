@@ -26,6 +26,7 @@ public class CountryResource {
         Log.info("Searching Countries By Capital");
         return searchService.searchingRestClient("capital", capital, false);
     }
+
     //Second Question
     @GET
     @Path("country/{country-name}")
@@ -34,6 +35,7 @@ public class CountryResource {
         Log.info("Searching Countries By Name");
         return searchService.searchingRestClient("countryName", countryName, fulltext);
     }
+
     //Third Question
     @POST
     @Path("kafka")
@@ -41,6 +43,7 @@ public class CountryResource {
     public Response PostCountryToKafka(Country country) {
         return searchService.PostCountryToKafka(country);
     }
+
     //Fourth Question
     @GET
     @Path("kafka/{country-name}")
@@ -48,6 +51,8 @@ public class CountryResource {
     public Uni<ArrayNode> getKafka(@PathParam("country-name") String countryName) {
         return searchService.getKafka(countryName);
     }
+
+    //Getting all Countries stored in myMongoDB Collection "CountriesCache"
     @GET
     @Path("countries")
     public Response getAll() {

@@ -10,7 +10,8 @@ import java.util.Map;
 public class CountryDeserializer implements Deserializer<Country> {
 
     @Override
-    public void configure(Map<String, ?> configs, boolean isKey) {}
+    public void configure(Map<String, ?> configs, boolean isKey) {
+    }
 
     @Override
     public Country deserialize(String topic, byte[] data) {
@@ -23,5 +24,6 @@ public class CountryDeserializer implements Deserializer<Country> {
     }
 
     @Override
-    public void close() {}
+    public void close() {
+    }
 }

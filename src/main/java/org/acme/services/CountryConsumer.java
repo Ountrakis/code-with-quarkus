@@ -24,11 +24,11 @@ public class CountryConsumer {
 
     @Incoming("kafka-countries-in")
     public void consume(Country country) {
-            Document document = new Document("Country",country);
-            mongoClient
-                    .getDatabase("Countries")
-                    .getCollection("KafkaCountries")
-                    .insertOne(document);
+        Document document = new Document("Country", country);
+        mongoClient
+                .getDatabase("Countries")
+                .getCollection("KafkaCountries")
+                .insertOne(document);
 
 
     }

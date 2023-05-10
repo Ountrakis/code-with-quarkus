@@ -12,6 +12,7 @@ import java.util.List;
 @ApplicationScoped
 public class JsonFormat {
     ObjectMapper mapper = new ObjectMapper();
+
     public Uni<ArrayNode> JsonFormatMethod(Uni<List<Country>> countryUni) {
         return Uni.createFrom().emitter(emitter -> countryUni.subscribe().with(
                 response -> {

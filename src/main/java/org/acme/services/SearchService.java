@@ -27,11 +27,12 @@ public class SearchService {
     CountryProducer producer;
     @Inject
     CountryConsumer consumer;
+
     public Uni<ArrayNode> searchingRestClient(String whatImSearching, String name, boolean fulltext) {
         myMongoService.TTL();
         List<Country> mCountryList = new ArrayList<>();
         name = name.substring(0, 1).toUpperCase() + name.substring(1);
-        List<Country> searchList = myMongoService.searchCountries(name,whatImSearching,"CountriesCache");
+        List<Country> searchList = myMongoService.searchCountries(name, whatImSearching, "CountriesCache");
 
         if (!searchList.isEmpty()) {
             List<Country> Result = new ArrayList<>();
@@ -43,8 +44,7 @@ public class SearchService {
                 }
             }
             mCountryList.addAll(Result);
-        }
-        else {
+        } else {
             if (whatImSearching.equals("capital")) {
                 mCountryList = myCountryService.getCountryByCapital(name).await().indefinitely();
 
@@ -57,6 +57,7 @@ public class SearchService {
 
         return jsonFormat.JsonFormatMethod(countryUni);
     }
+
     public Response PostCountryToKafka(Country country) {
         Log.info("Posting country to Kafka");
         List<Country> countries = myCountryService.getCountryByCapital(country.getCapital()).await().indefinitely();
@@ -66,12 +67,14 @@ public class SearchService {
         }
         return Response.ok().build();
     }
+
     public Uni<ArrayNode> getKafka(@PathParam("country-name") String countryName) {
         Log.info("Getting country using Kafka");
-        List<Country> mCountryList = myMongoService.searchCountries(countryName,"Country.name","KafkaCountries");
+        List<Country> mCountryList = myMongoService.searchCountries(countryName, "Country.name", "KafkaCountries");
         Uni<List<Country>> countryUni = Uni.createFrom().item(mCountryList);
         return jsonFormat.JsonFormatMethod(countryUni);
     }
+
     public Response getAllCountries() {
         return myMongoService.getAllCountries();
     }
