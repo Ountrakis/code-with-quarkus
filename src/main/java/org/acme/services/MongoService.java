@@ -40,9 +40,7 @@ public class MongoService {
 
         List<Document> results = new ArrayList<>();
         FindIterable<Document> findIterable = collection.find(query);
-        MongoCursor<Document> cursor = findIterable.iterator();
-        while (cursor.hasNext()) {
-            Document result = cursor.next();
+        for (Document result : findIterable) {
             results.add(result);
         }
 
