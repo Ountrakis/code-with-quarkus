@@ -3,6 +3,7 @@ package org.acme.services;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import io.quarkus.logging.Log;
 import io.smallrye.mutiny.Uni;
+import org.acme.config.MongoProperties;
 import org.acme.model.Country;
 import org.acme.util.JsonFormat;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
@@ -27,12 +28,14 @@ public class SearchService {
     CountryProducer producer;
     @Inject
     CountryConsumer consumer;
+    @Inject
+    MongoProperties mongoProperties;
 
     public Uni<ArrayNode> searchingRestClient(String whatImSearching, String name, boolean fulltext) {
         myMongoService.TTL();
         List<Country> mCountryList = new ArrayList<>();
         name = name.substring(0, 1).toUpperCase() + name.substring(1);
-        List<Country> searchList = myMongoService.searchCountries(name, whatImSearching, "CountriesCache");
+        List<Country> searchList = myMongoService.searchCountries(name, whatImSearching, mongoProperties.getCollectionCountriesCache());
 
         if (!searchList.isEmpty()) {
             List<Country> Result = new ArrayList<>();
@@ -70,7 +73,7 @@ public class SearchService {
 
     public Uni<ArrayNode> getKafka(@PathParam("country-name") String countryName) {
         Log.info("Getting country using Kafka");
-        List<Country> mCountryList = myMongoService.searchCountries(countryName, "Country.name", "KafkaCountries");
+        List<Country> mCountryList = myMongoService.searchCountries(countryName, "Country.name", mongoProperties.getCollectionKafkaCountries());
         Uni<List<Country>> countryUni = Uni.createFrom().item(mCountryList);
         return jsonFormat.JsonFormatMethod(countryUni);
     }

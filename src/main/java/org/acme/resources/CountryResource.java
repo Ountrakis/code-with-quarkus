@@ -6,13 +6,11 @@ import io.smallrye.mutiny.Uni;
 import org.acme.model.Country;
 import org.acme.services.SearchService;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@ApplicationScoped
 @Path("")
 public class CountryResource {
     @Inject

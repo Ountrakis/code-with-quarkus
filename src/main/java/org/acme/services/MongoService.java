@@ -2,12 +2,14 @@ package org.acme.services;
 
 import com.mongodb.client.*;
 import com.mongodb.client.model.IndexOptions;
+import org.acme.config.MongoProperties;
 import org.acme.model.Country;
 import org.acme.model.Currencies;
 import org.acme.model.Language;
 import org.bson.Document;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,12 +19,15 @@ import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class MongoService {
-    MongoClient mongoClient = MongoClients.create("mongodb://localhost:27017");
-    MongoDatabase database = mongoClient.getDatabase("Countries");
+    @Inject
+    MongoProperties mongoProperties;
+
+    MongoClient mongoClient = MongoClients.create(mongoProperties.getConnectionString());
+    MongoDatabase database = mongoClient.getDatabase(mongoProperties.getDatabase());
+
 
     public void TTL() {
-        mongoClient.getDatabase("Countries")
-                .getCollection("CountriesCache")
+        database.getCollection(mongoProperties.getCollectionCountriesCache())
                 .createIndex(new Document("createdAt", 1), new IndexOptions().expireAfter(10L, TimeUnit.MINUTES));
     }
 
@@ -44,17 +49,17 @@ public class MongoService {
         for (Document result : results) {
             if (result != null) {
                 Country country = new Country();
-                if (searchingCollection.equals("KafkaCountries")) {
-                    country.setName(result.get("Country", Document.class).getString("name"));
-                    country.setAlpha2Code(result.get("Country", Document.class).getString("alpha2Code"));
-                    country.setCapital(result.get("Country", Document.class).getString("capital"));
-                    country.setRegion(result.get("Country", Document.class).getString("region"));
-                    country.setLanguages(result.get("Country", Document.class)
+                if (searchingCollection.equals(mongoProperties.getCollectionKafkaCountries())) {
+                    country.setName(result.get(mongoProperties.getDocumentClass(), Document.class).getString("name"));
+                    country.setAlpha2Code(result.get(mongoProperties.getDocumentClass(), Document.class).getString("alpha2Code"));
+                    country.setCapital(result.get(mongoProperties.getDocumentClass(), Document.class).getString("capital"));
+                    country.setRegion(result.get(mongoProperties.getDocumentClass(), Document.class).getString("region"));
+                    country.setLanguages(result.get(mongoProperties.getDocumentClass(), Document.class)
                             .getList("languages", Document.class)
                             .stream()
                             .map(doc -> new Language(doc.getString("name")))
                             .collect(Collectors.toList()));
-                    country.setCurrencies(result.get("Country", Document.class)
+                    country.setCurrencies(result.get(mongoProperties.getDocumentClass(), Document.class)
                             .getList("currencies", Document.class)
                             .stream()
                             .map(doc -> new Currencies(doc.getString("name")))
@@ -85,7 +90,7 @@ public class MongoService {
     }
 
     public void addDocument(List<Country> countryList) {
-        MongoCollection<Document> collection = database.getCollection("CountriesCache");
+        MongoCollection<Document> collection = database.getCollection(mongoProperties.getCollectionCountriesCache());
         for (Country country : countryList) {
             Document countryDoc = new Document();
             countryDoc.append("countryName", country.getName())
@@ -102,7 +107,7 @@ public class MongoService {
 
     public Response getAllCountries() {
         List<Document> results = new ArrayList<>();
-        MongoCollection<Document> collection = database.getCollection("CountriesCache");
+        MongoCollection<Document> collection = database.getCollection(mongoProperties.getCollectionCountriesCache());
         MongoCursor<Document> cursor = collection.find().iterator();
         while (cursor.hasNext()) {
             Document result = cursor.next();
