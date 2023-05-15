@@ -8,6 +8,7 @@ import org.acme.model.Currencies;
 import org.acme.model.Language;
 import org.bson.Document;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
@@ -21,10 +22,13 @@ import java.util.stream.Collectors;
 public class MongoService {
     @Inject
     MongoProperties mongoProperties;
-
-    MongoClient mongoClient = MongoClients.create(mongoProperties.getConnectionString());
-    MongoDatabase database = mongoClient.getDatabase(mongoProperties.getDatabase());
-
+    MongoClient mongoClient;
+    MongoDatabase database;
+    @PostConstruct
+    void init(){
+         mongoClient= MongoClients.create(mongoProperties.getConnectionString());
+         database= mongoClient.getDatabase(mongoProperties.getDatabase());
+    }
 
     public void TTL() {
         database.getCollection(mongoProperties.getCollectionCountriesCache())

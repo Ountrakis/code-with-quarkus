@@ -16,7 +16,7 @@ public class CountryResource {
     @Inject
     SearchService searchService;
 
-    //First Question
+    //First Question : Getting Country, searching by capital, from collection "CountriesCache"
     @GET
     @Path("capital/{capital-name}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -25,7 +25,7 @@ public class CountryResource {
         return searchService.searchingRestClient("capital", capital, false);
     }
 
-    //Second Question
+    //Second Question : Getting Country, searching by name, from collection "CountriesCache"
     @GET
     @Path("country/{country-name}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -34,7 +34,7 @@ public class CountryResource {
         return searchService.searchingRestClient("countryName", countryName, fulltext);
     }
 
-    //Third Question
+    //Third Question : Posting Country using Kafka to collection "KafkaCountries"
     @POST
     @Path("kafka")
     @Produces(MediaType.APPLICATION_JSON)
@@ -42,7 +42,7 @@ public class CountryResource {
         return searchService.PostCountryToKafka(country);
     }
 
-    //Fourth Question
+    //Fourth Question : Getting Country using Kafka from collection "KafkaCountries"
     @GET
     @Path("kafka/{country-name}")
     @Produces(MediaType.APPLICATION_JSON)
