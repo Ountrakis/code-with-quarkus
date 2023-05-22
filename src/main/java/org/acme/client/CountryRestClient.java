@@ -1,4 +1,4 @@
-package org.acme.services;
+package org.acme.client;
 
 import io.smallrye.mutiny.Uni;
 import org.acme.model.Country;
@@ -11,7 +11,7 @@ import java.util.List;
 @Path("/v2/")
 @Produces(MediaType.APPLICATION_JSON)
 @RegisterRestClient(configKey = "country-api")
-public interface CountryService {
+public interface CountryRestClient {
 
     @GET
     @Path("name/{country-name}")

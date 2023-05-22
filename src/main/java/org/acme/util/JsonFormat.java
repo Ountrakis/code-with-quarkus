@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.smallrye.mutiny.Uni;
 import org.acme.model.Country;
-
 import javax.enterprise.context.ApplicationScoped;
 import java.util.List;
 

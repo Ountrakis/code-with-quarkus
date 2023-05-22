@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 @ApplicationScoped
 public class CountryProducer {
+    Country country;
 
     @Inject
     @Channel("kafka-countries-out")
