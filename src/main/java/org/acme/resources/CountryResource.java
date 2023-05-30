@@ -8,8 +8,8 @@ import org.acme.services.SearchService;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
 
 @Path("")
 public class CountryResource {
@@ -19,16 +19,14 @@ public class CountryResource {
     //First Question : Getting Country, searching by capital, from collection "CountriesCache"
     @GET
     @Path("capital/{capital-name}")
-    @Produces(MediaType.APPLICATION_JSON)
     public Uni<ArrayNode> getCountryByCapital(@PathParam("capital-name") String capital) {
         Log.info("Searching Countries By Capital");
-        return searchService.searchingRestClient("capital", capital, false);
+        return searchService.searchingRestClient("capital", capital,false);
     }
 
     //Second Question : Getting Country, searching by name, from collection "CountriesCache"
     @GET
     @Path("country/{country-name}")
-    @Produces(MediaType.APPLICATION_JSON)
     public Uni<ArrayNode> getCountryByName(@PathParam("country-name") String countryName, @QueryParam("fulltext") boolean fulltext) {
         Log.info("Searching Countries By Name");
         return searchService.searchingRestClient("countryName", countryName, fulltext);
@@ -37,15 +35,13 @@ public class CountryResource {
     //Third Question : Posting Country using Kafka to collection "KafkaCountries"
     @POST
     @Path("kafka")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response PostCountryToKafka(Country country) {
-        return searchService.PostCountryToKafka(country);
+    public Response postCountryToKafka(Country country) {
+        return searchService.postCountryToKafka(country);
     }
 
     //Fourth Question : Getting Country using Kafka from collection "KafkaCountries"
     @GET
     @Path("kafka/{country-name}")
-    @Produces(MediaType.APPLICATION_JSON)
     public Uni<ArrayNode> getKafka(@PathParam("country-name") String countryName) {
         return searchService.getKafka(countryName);
     }
