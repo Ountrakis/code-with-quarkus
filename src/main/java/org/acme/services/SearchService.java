@@ -13,7 +13,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 
@@ -33,28 +34,33 @@ public class SearchService {
     @Inject
     MongoProperties mongoProperties;
 
+
     public Uni<ArrayNode> searchingRestClient(String whatImSearching, String name, boolean fulltext) {
         myMongoService.ttl();
+        Uni<ArrayNode> arrayNodeUni;
         Uni<List<Country>> mCountryList = Uni.createFrom().item(new ArrayList<>());
         name = name.substring(0, 1).toUpperCase() + name.substring(1);
         List<Country> searchList = myMongoService.searchCountries(name, whatImSearching, mongoProperties.getCollectionCountriesCache());
 
         if (searchList.isEmpty()) {
-            return jsonFormat.jsonFormatMethod(addToDatabase(mCountryList, whatImSearching, name, fulltext));
+            arrayNodeUni= jsonFormat.jsonFormatMethod(addToDatabase(mCountryList, whatImSearching, name, fulltext));
         }
         else {
-            return jsonFormat.jsonFormatMethod(retrieveFromDatabase(mCountryList, searchList, name));
+            arrayNodeUni= jsonFormat.jsonFormatMethod(retrieveFromDatabase(mCountryList, searchList, name));
         }
+        return arrayNodeUni;
     }
 
-    public Response postCountryToKafka(Country country) {
+    public Uni<Response> postCountryToKafka(Country country) {
         Log.info("Posting country using Kafka");
-        List<Country> countries = myCountryRestClient.getCountryByCapital(country.getCapital()).await().indefinitely();
-        for (Country mCountry : countries) {
-            producer.produce(mCountry);
-            consumer.consume(mCountry);
-        }
-        return Response.ok().build();
+        return myCountryRestClient.getCountryByCapital(country.getCapital())
+                .onItem().transformToUni(countries -> {
+                    countries.forEach(mCountry -> {
+                        producer.produce(mCountry);
+                        consumer.consume(mCountry);
+                    });
+                    return Uni.createFrom().item(Response.ok().build());
+                });
     }
 
     public Uni<ArrayNode> getKafka(@PathParam("country-name") String countryName) {
@@ -64,7 +70,7 @@ public class SearchService {
         return jsonFormat.jsonFormatMethod(countryUni);
     }
 
-    public Response getAllCountries() {
+    public Uni<Response> getAllCountries() {
         return myMongoService.getAllCountries();
     }
 
@@ -76,14 +82,17 @@ public class SearchService {
         else if (whatImSearching.equals("countryName")) {
             countryList = myCountryRestClient.getCountryByName(name, fulltext);
         }
-        countryList.onItem()
+        countryList
+                .onItem()
                 .transformToUni(list ->
                         Uni.combine()
                                 .all()
                                 .unis(list.stream()
                                         .map(country -> myMongoService.addDocument(country))
                                         .collect(Collectors.toList()))
-                                .discardItems()).subscribe().with(ef -> {
+                                .discardItems())
+                .subscribe()
+                        .with(ef -> {
                 });
         return countryList;
     }
@@ -102,5 +111,6 @@ public class SearchService {
         });
         return countryList;
     }
+
 
 }

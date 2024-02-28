@@ -3,6 +3,7 @@ package org.acme.services;
 import com.mongodb.client.*;
 import com.mongodb.client.model.IndexOptions;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import org.acme.config.MongoProperties;
 import org.acme.model.Country;
 import org.acme.model.Currencies;
@@ -17,9 +18,9 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
 @ApplicationScoped
 public class MongoService {
+
     @Inject
     MongoProperties mongoProperties;
     MongoClient mongoClient;
@@ -125,16 +126,18 @@ public class MongoService {
 
     }
 
-    public Response getAllCountries() {
-        List<Document> results = new ArrayList<>();
-        MongoCollection<Document> collection = database.getCollection(mongoProperties.getCollectionCountriesCache());
-        MongoCursor<Document> cursor = collection.find().iterator();
-        while (cursor.hasNext()) {
-            Document result = cursor.next();
-            results.add(result);
-        }
-        cursor.close();
-        return Response.ok(results).build();
+    public Uni<Response> getAllCountries() {
+        return Uni.createFrom().item(() -> {
+            List<Document> results = new ArrayList<>();
+            MongoCollection<Document> collection = database.getCollection(mongoProperties.getCollectionCountriesCache());
+            try (MongoCursor<Document> cursor = collection.find().iterator()) {
+                while (cursor.hasNext()) {
+                    Document result = cursor.next();
+                    results.add(result);
+                }
+            }
+            return Response.ok(results).build();
+        }).runSubscriptionOn(Infrastructure.getDefaultWorkerPool());
     }
 
 }

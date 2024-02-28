@@ -5,6 +5,7 @@ import io.quarkus.logging.Log;
 import io.smallrye.mutiny.Uni;
 import org.acme.model.Country;
 import org.acme.services.SearchService;
+import org.acme.util.TMFException;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -19,7 +20,7 @@ public class CountryResource {
     //First Question : Getting Country, searching by capital, from collection "CountriesCache"
     @GET
     @Path("capital/{capital-name}")
-    public Uni<ArrayNode> getCountryByCapital(@PathParam("capital-name") String capital) {
+    public Uni<ArrayNode> getCountryByCapital(@PathParam("capital-name") String capital) throws TMFException {
         Log.info("Searching Countries By Capital");
         return searchService.searchingRestClient("capital", capital,false);
     }
@@ -35,7 +36,7 @@ public class CountryResource {
     //Third Question : Posting Country using Kafka to collection "KafkaCountries"
     @POST
     @Path("kafka")
-    public Response postCountryToKafka(Country country) {
+    public Uni<Response> postCountryToKafka(Country country) {
         return searchService.postCountryToKafka(country);
     }
 
@@ -49,7 +50,7 @@ public class CountryResource {
     //Getting all Countries stored in myMongoDB Collection "CountriesCache"
     @GET
     @Path("countries")
-    public Response getAll() {
+    public Uni<Response> getAll() {
         return searchService.getAllCountries();
     }
 
